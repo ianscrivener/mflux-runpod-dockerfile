@@ -73,9 +73,10 @@ WORKDIR /app
 # Install Python runtime dependencies for the handler
 RUN uv pip install pip runpod requests websocket-client
 
-# Install MLX and verify installation
-RUN uv pip install --no-cache "mlx[cuda]==0.32.0" \
-    && python -c 'import mlx.core as mx; print("MLX:", mx.__version__)'
+# Install MLX for CUDA 13 and check the installed version.
+# The build has no GPU driver (libcuda.so.1), so do not import mlx.core here.
+RUN uv pip install --no-cache "mlx[cuda13]==0.32.0" \
+    && python -c 'from importlib.metadata import version; print("mlx-cuda-13:", version("mlx-cuda-13"))'
 
 # Clone mflux source (pin with MFLUX_SHA, defaults to main)
 # Remove torch from the mflux dependencies, then install mflux and verify
