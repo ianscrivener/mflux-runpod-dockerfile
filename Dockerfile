@@ -75,7 +75,7 @@ RUN uv pip install pip runpod requests websocket-client
 
 # Install MLX for CUDA 13 and check the installed version.
 # The build has no GPU driver (libcuda.so.1), so do not import mlx.core here.
-RUN uv pip install --no-cache "mlx[cuda13]==0.32.0" \
+RUN uv pip install --no-cache "mlx[cuda13]==0.32.0" hf \
     && python -c 'from importlib.metadata import version; print("mlx-cuda-13:", version("mlx-cuda-13"))'
 
 # Clone mflux source (pin with MFLUX_SHA, defaults to main)
@@ -84,7 +84,11 @@ RUN git clone https://github.com/mflux-community/mflux.git /tmp/mflux \
     && sed -i '/^[[:space:]]*"torch[>=<~! ]/d' /tmp/mflux/pyproject.toml \
     && uv pip install --no-cache /tmp/mflux \
     && python -c 'from importlib.metadata import version; print("mflux:", version("mflux"))' \
-    && rm -rf /tmp/mflux
+    && rm -rf /tmp/mflux \
+    && pip install hf
+
+# Create the Hugging Face hub directory for caching models and other assets
+RUN mkdir -p /workspace/hf/hub
 
 # Copy your handler code
 COPY handler.py .
